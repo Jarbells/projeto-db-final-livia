@@ -1,40 +1,4 @@
--- Deletar todas as tabelas.
-DROP TABLE IF EXISTS Agendamento;
-DROP TABLE IF EXISTS Responsabilidade;
-DROP TABLE IF EXISTS Medico_Servico;
-DROP TABLE IF EXISTS Alergia;
-DROP TABLE IF EXISTS Horario_Atendimento_Medico;
-DROP TABLE IF EXISTS Horario_Atendimento_Secretario;
-DROP TABLE IF EXISTS Email;
-DROP TABLE IF EXISTS Telefone;
-DROP TABLE IF EXISTS Endereco;
-DROP TABLE IF EXISTS Cliente;
-DROP TABLE IF EXISTS Medico;
-DROP TABLE IF EXISTS Secretario;
-DROP TABLE IF EXISTS Pessoa;
-DROP TABLE IF EXISTS Servico;
-DROP TABLE IF EXISTS Dia_Semana;
-
--- Utilizando o CASCADE para eliminar automaticamente todas as dependências relacionadas as tabelas.
-DROP TABLE IF EXISTS Agendamento CASCADE;
-DROP TABLE IF EXISTS Responsabilidade CASCADE;
-DROP TABLE IF EXISTS Medico_Servico CASCADE;
-DROP TABLE IF EXISTS Alergia CASCADE;
-DROP TABLE IF EXISTS Horario_Atendimento_Medico CASCADE;
-DROP TABLE IF EXISTS Horario_Atendimento_Secretario CASCADE;
-DROP TABLE IF EXISTS Email CASCADE;
-DROP TABLE IF EXISTS Telefone CASCADE;
-DROP TABLE IF EXISTS Endereco CASCADE;
-DROP TABLE IF EXISTS Cliente CASCADE;
-DROP TABLE IF EXISTS Medico CASCADE;
-DROP TABLE IF EXISTS Secretario CASCADE;
-DROP TABLE IF EXISTS Pessoa CASCADE;
-DROP TABLE IF EXISTS Servico CASCADE;
-DROP TABLE IF EXISTS Dia_Semana CASCADE;
-
-
-
-
+-- Criar esquema e setar para sistema
 CREATE SCHEMA sistema;
 SET search_path TO sistema;
 
@@ -115,14 +79,14 @@ CREATE TABLE Dia_Semana (
 );
 
 -- Populando a tabela dia_semana
-INSERT INTO Dia_Semana (Nome_Dia) VALUES
-('Segunda-feira'),
-('Terça-feira'),
-('Quarta-feira'),
-('Quinta-feira'),
-('Sexta-feira'),
-('Sábado'),
-('Domingo');
+INSERT INTO Dia_Semana (ID_Dia_Semana, Nome_Dia) VALUES
+(1, 'Domingo'),
+(2, 'Segunda-feira'),
+(3, 'Terça-feira'),
+(4, 'Quarta-feira'),
+(5, 'Quinta-feira'),
+(6, 'Sexta-feira'),
+(7, 'Sábado');
 
 -- Tabela horario_atendimento_secretario
 CREATE TABLE Horario_Atendimento_Secretario (
@@ -199,87 +163,3 @@ CREATE TABLE Responsabilidade (
     ID_Secretario INT NOT NULL,
     FOREIGN KEY (ID_Secretario) REFERENCES Secretario(ID_Secretario) ON DELETE CASCADE
 );
-
--- Povoamento do banco
--- Inserindo em pessoa
-INSERT INTO Pessoa (Nome, CPF)
-VALUES ('Dr. João da Silva', '12345678901') -- Nome e CPF do médico.
-RETURNING ID_Pessoa;
-
--- Inserindo em medico
-INSERT INTO Medico (ID_Pessoa, CRM, Especializacao)
-VALUES (1, '123456-SP', 'Cardiologista');
-
--- Inserindo em email
-INSERT INTO Email (Email, ID_Pessoa)
-VALUES ('joao.silva@hospital.com', 1);
-
--- Inserindo em telefone
-INSERT INTO Telefone (Telefone, ID_Pessoa)
-VALUES ('+5511999999999', 1);
-
--- Inserindo horario_atendimento_medico
--- Segunda-feira
-INSERT INTO Horario_Atendimento_Medico (ID_Dia_Semana, Hora_Inicio_Manha, Hora_Fim_Manha, Hora_Inicio_Tarde, Hora_Fim_Tarde, ID_Medico)
-VALUES (1, '08:00', '12:00', '13:00', '17:00', 1);
-
--- Quarta-feira
-INSERT INTO Horario_Atendimento_Medico (ID_Dia_Semana, Hora_Inicio_Manha, Hora_Fim_Manha, Hora_Inicio_Tarde, Hora_Fim_Tarde, ID_Medico)
-VALUES (3, '08:00', '12:00', '13:00', '17:00', 1);
-
--- Sexta-feira
-INSERT INTO Horario_Atendimento_Medico (ID_Dia_Semana, Hora_Inicio_Manha, Hora_Fim_Manha, Hora_Inicio_Tarde, Hora_Fim_Tarde, ID_Medico)
-VALUES (5, '08:00', '12:00', '13:00', '17:00', 1);
-
--- Inserindo na tabela servico
-INSERT INTO Servico (Descricao, Valor)
-VALUES ('Consulta Cardiológica', 300.00)
-RETURNING ID_Servico;
-
--- Inserindo na tabela medico_servico
-INSERT INTO Medico_Servico (ID_Medico, ID_Servico)
-VALUES (1, 1);
-
--- Inserindo na tabela endereco
-INSERT INTO Endereco (Rua, Numero, Bairro, Cidade, Estado, ID_Pessoa)
-VALUES ('Rua das Pedrinhas', '123', 'Centro', 'Quixadá', 'CE', 1);
-
-
-
-
-
--- Consultar tudo sobre os médicos
-SELECT 
-    p.ID_Pessoa, 
-    p.Nome, 
-    p.CPF, 
-    e.Email, 
-    t.Telefone, 
-    en.Rua, en.Numero, en.Bairro, en.Cidade, en.Estado, 
-    m.CRM, 
-    m.Especializacao, 
-    hs.Nome_Dia AS Dia_Atendimento, 
-    h.Hora_Inicio_Manha, h.Hora_Fim_Manha, h.Hora_Inicio_Tarde, h.Hora_Fim_Tarde, 
-    s.Descricao AS Servico, 
-    s.Valor
-FROM 
-    Pessoa p
-JOIN 
-    Medico m ON p.ID_Pessoa = m.ID_Pessoa
-LEFT JOIN 
-    Email e ON p.ID_Pessoa = e.ID_Pessoa
-LEFT JOIN 
-    Telefone t ON p.ID_Pessoa = t.ID_Pessoa
-LEFT JOIN 
-    Endereco en ON p.ID_Pessoa = en.ID_Pessoa
-LEFT JOIN 
-    Horario_Atendimento_Medico h ON m.ID_Medico = h.ID_Medico
-LEFT JOIN 
-    Dia_Semana hs ON h.ID_Dia_Semana = hs.ID_Dia_Semana
-LEFT JOIN 
-    Medico_Servico ms ON m.ID_Medico = ms.ID_Medico
-LEFT JOIN 
-    Servico s ON ms.ID_Servico = s.ID_Servico
-WHERE 
-    p.ID_Pessoa = 1; -- Substitua 1 pelo ID_Pessoa do médico que deseja consultar
-
